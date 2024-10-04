@@ -11,8 +11,8 @@ Adaptação para botões físicos @2024
 String recebido;
 String sequenciaNumerica = "";
 
-const int LED_PINS[] = {8, 9, 10};   // Array de LEDs
-const int BUTTON_PINS[] = {2, 3, 4}; // Array de Botões
+const int LED_PINS[] = {8, 9, 10, 11};   // Array de LEDs
+const int BUTTON_PINS[] = {2, 3, 4, 5}; // Array de Botões
 
 const long SERIAL_TIMEOUT = 10000;   // Timeout de 10 segundos para leitura do Serial
 const int NUM_LEDS = sizeof(LED_PINS) / sizeof(LED_PINS[0]);
@@ -20,7 +20,7 @@ const int NUM_LEDS = sizeof(LED_PINS) / sizeof(LED_PINS[0]);
 long numeroGerado;
 
 int sequencia;
-bool usandoBotao = false;  // Indica se o jogador está usando botões
+bool usandoBotao = true;  // Indica se o jogador está usando botões
 
 // Definindo o enum para os estados do jogo
 enum GameState {
@@ -50,18 +50,28 @@ void loop() {
   switch (stateGame) {
     case START_GAME:
       Serial.println("* INICIO *");
+      
+      // Pergunta qual modo de jogo o jogador quer usar
       Serial.println("Modo de jogo: (s) Serial ou (b) Botão?");
-      leserial();
+      leserial();  // Aqui lemos a resposta do jogador sobre o modo de entrada
+      
+      // Verifica qual modo foi escolhido
       if (recebido.equalsIgnoreCase("b")) {
         usandoBotao = true;
         Serial.println("Modo de jogo: Botão");
-      } else {
+      } else if (recebido.equalsIgnoreCase("s")) {
         usandoBotao = false;
         Serial.println("Modo de jogo: Serial");
+      } else {
+        // Se a entrada for inválida, perguntar de novo
+        Serial.println("Entrada inválida, tente novamente.");
+        return;  // Reinicia o loop para fazer a pergunta novamente
       }
-
+      
+      // Pergunta se deseja começar o jogo
       Serial.println("Começar? (s/n)");
-      leserial();
+      leserial();  // Lê a resposta do jogador se quer iniciar o jogo
+      
       if (recebido.equalsIgnoreCase("s")) {
         stateGame = LEVEL_1;
         Serial.println("Jogo começando...");
@@ -151,17 +161,23 @@ void leserial() {
 void leBotao(int sequencia) {
   recebido = "";
   Serial.println("Pressione os botões na sequência.");
-  
+
   for (int i = 0; i < sequencia; i++) {
     bool botaoPressionado = false;
+
     while (!botaoPressionado) {
       for (int j = 0; j < NUM_LEDS; j++) {
         if (digitalRead(BUTTON_PINS[j]) == LOW) { // Botão pressionado
           recebido += String(j + 1);
           Serial.print("Botão: ");
           Serial.println(j + 1);
-          botaoPressionado = true;
-          delay(500);  // Debounce simples
+          botaoPressionado = true; // Marca que o botão foi pressionado
+          delay(500); // Debounce simples
+          while (digitalRead(BUTTON_PINS[j]) == LOW) {
+            // Espera o botão ser solto
+            delay(10);
+          }
+          break; // Sai do loop dos botões
         }
       }
     }
@@ -169,6 +185,7 @@ void leBotao(int sequencia) {
   Serial.print("Sequência recebida via botões: ");
   Serial.println(recebido);
 }
+
 
 void piscaled(int tempo, int vezes) {
   for (int i = 0; i < vezes; i++) {
