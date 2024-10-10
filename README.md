@@ -56,6 +56,10 @@ O jogo tem a dinâmica padrão de qualquer outro jogo da memória: Inicia-se o g
 - Comando de Voz: Através de um script em Python, ao receber a informação da cor, o computador anuncia em voz alta a cor acionada.
 - OUTRAS FEATURES: O grupo pode propor outras features avançadas, mas deve ser aprovado pelo professor.
 
+# Link do Wowki
+
+https://wokwi.com/projects/411220542228622337
+
 # Rubrica:
 
 ![image](https://github.com/user-attachments/assets/82827850-f909-4871-988b-405e5a03c40c)
